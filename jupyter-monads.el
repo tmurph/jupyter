@@ -41,10 +41,15 @@
 
 (require 'jupyter-base)
 
-(declare-function jupyter-handle-message "jupyter-client")
-(declare-function jupyter-kernel-io "jupyter-client")
+(cl-deftype jupyter-kernel-client () t)
 (declare-function jupyter-generate-request "jupyter-client")
+(declare-function jupyter-handle-message "jupyter-client")
+(declare-function jupyter-kernel-client "jupyter-client")
+(declare-function jupyter-kernel-io "jupyter-client")
 (declare-function jupyter-wait-until-idle "jupyter-client" (req &optional timeout progress-msg))
+
+(declare-function jupyter-message-channel "jupyter-messages")
+(declare-function jupyter-message-p "jupyter-messages")
 
 (defconst jupyter--return-nil (lambda (state) (cons nil state)))
 
@@ -71,6 +76,33 @@
   "Return a monadic value that sets the current state to VALUE.
 The unwrapped value is nil."
   (lambda (_state) (cons nil value)))
+
+(defmacro jupyter-mlet* (varlist &rest body)
+  "Bind the monadic values in VARLIST, evaluate BODY.
+Return the result of evaluating BODY.  The result of evaluating
+BODY should be another monadic value."
+  (declare (indent 1) (debug ((&rest (symbolp form)) body)))
+  (if (null varlist)
+      (if (zerop (length body)) 'jupyter--return-nil
+        `(progn ,@body))
+    (pcase-let ((`(,name ,mvalue) (car varlist)))
+      `(jupyter-bind ,mvalue
+         (lambda (,name)
+           (jupyter-mlet* ,(cdr varlist)
+             ,@body))))))
+
+(defmacro jupyter-do (&rest actions)
+  "Return a monadic value that performs all actions in ACTIONS.
+The actions are evaluated in the order given.  The result of the
+returned action is the result of the last action in ACTIONS."
+  (declare (indent 0) (debug (body)))
+  (cond
+   ((zerop (length actions)) 'jupyter--return-nil)
+   ((= 1 (length actions))
+    (car actions))
+   (t
+    `(jupyter-mlet* ((_ ,(car actions)))
+       (jupyter-do ,@(cdr actions))))))
 
 (defun jupyter-get-client ()
   "Return a monadic value that returns the client."
@@ -142,33 +174,6 @@ generated."
            (jupyter-return
              (jupyter-run-with-state state
                ,action)))))))
-
-(defmacro jupyter-mlet* (varlist &rest body)
-  "Bind the monadic values in VARLIST, evaluate BODY.
-Return the result of evaluating BODY.  The result of evaluating
-BODY should be another monadic value."
-  (declare (indent 1) (debug ((&rest (symbolp form)) body)))
-  (if (null varlist)
-      (if (zerop (length body)) 'jupyter--return-nil
-        `(progn ,@body))
-    (pcase-let ((`(,name ,mvalue) (car varlist)))
-      `(jupyter-bind ,mvalue
-         (lambda (,name)
-           (jupyter-mlet* ,(cdr varlist)
-             ,@body))))))
-
-(defmacro jupyter-do (&rest actions)
-  "Return a monadic value that performs all actions in ACTIONS.
-The actions are evaluated in the order given.  The result of the
-returned action is the result of the last action in ACTIONS."
-  (declare (indent 0) (debug (body)))
-  (cond
-   ((zerop (length actions)) 'jupyter--return-nil)
-   ((= 1 (length actions))
-    (car actions))
-   (t
-    `(jupyter-mlet* ((_ ,(car actions)))
-       (jupyter-do ,@(cdr actions))))))
 
 (defun jupyter-run-with-state (state mvalue)
   "Pass STATE as the state to MVALUE, return the resulting value."

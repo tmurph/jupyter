@@ -1494,7 +1494,7 @@ kernel, but the prefix used by `jupyter-completion-at-point'.  See
 MATCHES are the completion matches returned by the kernel,
 METADATA is any extra data associated with MATCHES that was
 supplied by the kernel."
-  (let (buf)
+  (progn
     (with-temp-buffer
       (cl-loop
        for i from 0 below (length matches)

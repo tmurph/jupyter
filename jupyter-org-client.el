@@ -27,29 +27,16 @@
 
 ;;; Code:
 
-(require 'jupyter-repl)
 (require 'ob)
+(require 'org-element)
+
+(require 'jupyter-repl)
 
 (declare-function org-babel-python-table-or-string "ob-python" (results))
 (declare-function org-babel-jupyter-initiate-session "ob-jupyter" (&optional session params))
 (declare-function org-babel-jupyter-src-block-session "ob-jupyter" ())
-(declare-function org-babel-jupyter-session-initiated-p "ob-jupyter" (params))
+(declare-function org-babel-jupyter-session-initiated-p "ob-jupyter" (params &optional noerror))
 (declare-function org-babel-jupyter-language-p "ob-jupyter" (lang))
-(declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-create "org-element" (type &optional props &rest children))
-(declare-function org-element-type "org-element" (element))
-(declare-function org-element-normalize-string "org-element" (s))
-(declare-function org-element-at-point "org-element" ())
-(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
-(declare-function org-element-map "org-element"
-                  (data types fun &optional info first-match no-recursion with-affiliated))
-(declare-function org-drag-element-forward "org-element" ())
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-set-contents "org-element" (element &rest contents))
-(declare-function org-element-latex-fragment-parser "org-element" ())
-(declare-function org-element-latex-environment-parser "org-element" (limit affiliated))
-(declare-function org-element-interpret-data "org-element" (data))
-(declare-function org-element-put-property "org-element" (element property value))
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function org-table-align "org-table" ())
 (declare-function org-in-src-block-p "org" (&optional inside))

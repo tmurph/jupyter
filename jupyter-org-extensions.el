@@ -27,12 +27,12 @@
 
 ;;; Code:
 
+(require 'org-element)
+
 (require 'jupyter-kernelspec)
 (require 'jupyter-org-client)
 (eval-when-compile (require 'subr-x))
 
-(declare-function org-babel-jupyter-initiate-session "ob-jupyter" (&optional session params))
-(declare-function org-babel-jupyter-session-initiated-p "ob-jupyter" (&optional session params))
 (declare-function org-babel-jupyter-src-block-session "ob-jupyter" ())
 (declare-function org-babel-jupyter-language-p "ob-jupyter" (lang))
 (declare-function org-in-src-block-p "org" (&optional inside))
@@ -40,12 +40,6 @@
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-fold-show-context "org-fold" (&optional key))
 (declare-function org-next-line-empty-p "org" ())
-(declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-type "org-element" (element))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-interpret-data "org-element" (data))
-(declare-function org-element-at-point "org-element" ())
-(declare-function org-element-put-property "org-element" (element property value))
 (declare-function outline-show-entry "outline" ())
 (declare-function avy-jump "ext:avy")
 (declare-function ivy-read "ext:ivy")

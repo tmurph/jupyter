@@ -326,15 +326,14 @@ For `url-retrieve', the callback will be called with a nil status."
 
 (defmacro jupyter-test-with-server-kernel (server name kernel &rest body)
   (declare (indent 3))
-  (let ((id (make-symbol "id")))
-    `(let ((,kernel (jupyter-kernel
-                     :server server
-                     :spec (jupyter-guess-kernelspec
-                            ,name (jupyter-kernelspecs ,server)))))
-       (jupyter-launch ,kernel)
-       (unwind-protect
-           (progn ,@body)
-         (jupyter-shutdown ,kernel)))))
+  `(let ((,kernel (jupyter-kernel
+                   :server server
+                   :spec (jupyter-guess-kernelspec
+                          ,name (jupyter-kernelspecs ,server)))))
+     (jupyter-launch ,kernel)
+     (unwind-protect
+         (progn ,@body)
+       (jupyter-shutdown ,kernel))))
 
 (defmacro jupyter-test-with-some-kernelspecs (names &rest body)
   "Execute BODY in the context where extra kernelspecs with NAMES are available.
